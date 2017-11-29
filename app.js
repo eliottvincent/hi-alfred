@@ -448,7 +448,7 @@ function sendTemperatureMessage(recipientId) {
 		method: 'GET'
 	}, (error, response, body) => {
 		if (!error && response.statusCode === 200) {
-			const tmp = body;
+			const tmp = body[0];
 
 			const messageData = {
 				recipient: {
