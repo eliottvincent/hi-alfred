@@ -249,6 +249,7 @@ function receivedMessage(event) {
 				break;
 
 			case 'temperature':
+			case 'température':
 			case 'temp':
 			case 'tmp':
 				requestTemperature(senderID);
@@ -456,10 +457,14 @@ function requestTemperature(recipientId) {
 	client.publish('HiAlfredCommand', '0');
 
 	waitingUser = recipientId;
+
+	sendTypingOn(recipientId);
 }
 
 function sendTemperatureMessage(tmp) {
 
+	sendTypingOff(waitingUser);
+	
 	const messageData = {
 		recipient: {
 			id: waitingUser
