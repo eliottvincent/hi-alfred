@@ -1,6 +1,6 @@
 {
 	"name": "hi-alfred",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "Hi Alfred bot",
 	"main": "app.js",
 	"dependencies": {
