@@ -938,6 +938,8 @@ client.on('message', function (topic, message, packet) {
 
 			for (let user of waitingQueue) {
 
+				const index = waitingQueue.indexOf(user);
+				waitingQueue.slice(index, 1);
 				sendTemperatureMessage(user, message);
 			}
 		}
