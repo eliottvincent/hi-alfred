@@ -259,6 +259,16 @@ function receivedMessage(event) {
 			case 'light':
 			case 'del':
 			case 'led':
+				requestDownTemperature(senderID);
+				break;
+
+			case '+':
+			case 'up':
+				requestUpTemperature(senderID);
+				break;
+
+			case '-':
+			case 'down':
 				sendLightMessage(senderID);
 				break;
 
@@ -462,9 +472,40 @@ function requestTemperature(recipientId) {
 	sendTypingOn(recipientId);
 }
 
-function sendTemperatureMessage(tmp) {
+function requestUpTemperature(recipientId) {
 
-	// sendTypingOff(waitingUser);
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand', '+');
+
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'UP temperature'
+		}
+	};
+	callSendAPI(messageData);
+}
+
+function requestDownTemperature(recipientId) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand', '-');
+
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'DOWN temperature'
+		}
+	};
+	callSendAPI(messageData);
+}
+
+
+function sendTemperatureMessage(tmp) {
 
 	const messageData = {
 		recipient: {
