@@ -259,7 +259,7 @@ function receivedMessage(event) {
 			case 'light':
 			case 'del':
 			case 'led':
-				requestDownTemperature(senderID);
+				sendLightMessage(senderID);
 				break;
 
 			case '+':
@@ -269,7 +269,7 @@ function receivedMessage(event) {
 
 			case '-':
 			case 'down':
-				sendLightMessage(senderID);
+				requestDownTemperature(senderID);
 				break;
 
 			case 'image':
