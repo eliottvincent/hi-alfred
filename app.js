@@ -45,7 +45,7 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 	process.exit(1);
 }
 
-const waitingQueue = [];
+let waitingUser = "";
 
 /*
  * Use your own validation token. Check that the token used in the Webhook
@@ -455,20 +455,23 @@ function requestTemperature(recipientId) {
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '0');
 
-	waitingQueue.push(recipientId);
+	waitingUser = recipientId;
 }
 
-function sendTemperatureMessage(recipientId, tmp) {
+function sendTemperatureMessage(tmp) {
 
 	const messageData = {
 		recipient: {
-			id: recipientId
+			id: waitingUser
 		},
 		message: {
 			text: 'The temperature is actually ' + tmp + '°C'
 		}
 	};
 	callSendAPI(messageData);
+
+	waitingUser = "";
+
 }
 
 function sendLightMessage(recipientId) {
@@ -934,14 +937,9 @@ client.on('message', function (topic, message, packet) {
 	if (topic === 'HiAlfredData') {
 
 		console.log(message.toString());
-		if (waitingQueue.length) {
+		if (waitingUser !== "") {
 
-			for (let user of waitingQueue) {
-
-				const index = waitingQueue.indexOf(user);
-				waitingQueue.slice(index, 1);
-				sendTemperatureMessage(user, message);
-			}
+			sendTemperatureMessage(message);
 		}
 	}
 	// client.end()
