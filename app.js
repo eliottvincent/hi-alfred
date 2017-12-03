@@ -463,20 +463,22 @@ function requestTemperature(recipientId) {
 
 function sendTemperatureMessage(tmp) {
 
-	sendTypingOff(waitingUser);
-	
-	const messageData = {
-		recipient: {
-			id: waitingUser
-		},
-		message: {
-			text: 'The temperature is actually ' + tmp + '°C'
-		}
-	};
-	callSendAPI(messageData);
+	setTimeout(() => {
 
-	waitingUser = "";
+		sendTypingOff(waitingUser);
 
+		const messageData = {
+			recipient: {
+				id: waitingUser
+			},
+			message: {
+				text: 'The temperature is actually ' + tmp + '°C'
+			}
+		};
+		callSendAPI(messageData);
+
+		waitingUser = "";
+	}, 500);
 }
 
 function sendLightMessage(recipientId) {
