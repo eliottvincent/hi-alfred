@@ -27,7 +27,6 @@ app.use(express.static('public'));
 // MQTT PubSub client
 const client  = mqtt.connect('mqtt://broker.mqtt-dashboard.com');
 
-
 // App Secret can be retrieved from the App Dashboard
 const APP_SECRET = process.env.MESSENGER_APP_SECRET;
 
@@ -45,6 +44,8 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 	console.error("Missing config values");
 	process.exit(1);
 }
+
+const waitingQueue = [];
 
 /*
  * Use your own validation token. Check that the token used in the Webhook
@@ -250,7 +251,7 @@ function receivedMessage(event) {
 			case 'temperature':
 			case 'temp':
 			case 'tmp':
-				sendTemperatureMessage(senderID);
+				requestTemperature(senderID);
 				break;
 
 			case 'light':
@@ -449,13 +450,16 @@ Hi! I'm Alfred 👨🏻
 	callSendAPI(messageData);
 }
 
-
-function sendTemperatureMessage(recipientId) {
+function requestTemperature(recipientId) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '0');
 
-	const tmp = 'test';
+	waitingQueue.push(recipientId);
+}
+
+function sendTemperatureMessage(recipientId, tmp) {
+
 	const messageData = {
 		recipient: {
 			id: recipientId
@@ -926,10 +930,17 @@ client.on('connect', function () {
 
 client.on('message', function (topic, message, packet) {
 
-	console.log(JSON.stringify(packet, null, 4));
+	// console.log(JSON.stringify(packet, null, 4));
 	if (topic === 'HiAlfredData') {
 
 		console.log(message.toString());
+		if (waitingQueue.length) {
+
+			for (let user of waitingQueue) {
+
+				sendTemperatureMessage(user, message);
+			}
+		}
 	}
 	// client.end()
 });
