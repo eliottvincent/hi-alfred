@@ -11,10 +11,10 @@
 'use strict';
 
 const bodyParser = require('body-parser');
-	const crypto = require('crypto');
-	const express = require('express');
-	const https = require('https');
-	const request = require('request');
+const crypto = require('crypto');
+const express = require('express');
+const https = require('https');
+const request = require('request');
 
 const app = express();
 app.set('port', process.env.PORT || 5000);
@@ -480,7 +480,7 @@ function sendLightMessage(recipientId) {
 		uri: BLYNK_URL + 'update/D8',
 		method: 'PUT',
 		json: [
-			"low"
+			"1"
 		]
 	}, (error, response, body) => {
 		if (!error && response.statusCode === 200) {
@@ -493,7 +493,7 @@ function sendLightMessage(recipientId) {
 					id: recipientId
 				},
 				message: {
-					text: 'The light is on'
+					text: 'I switched the light on'
 				}
 			};
 
@@ -899,6 +899,12 @@ function sendAccountLinking(recipientId) {
 }
 
 
+//	██████╗ ██╗  ██╗   ██╗███╗   ██╗██╗  ██╗
+//	██╔══██╗██║  ╚██╗ ██╔╝████╗  ██║██║ ██╔╝
+//	██████╔╝██║   ╚████╔╝ ██╔██╗ ██║█████╔╝
+//	██╔══██╗██║    ╚██╔╝  ██║╚██╗██║██╔═██╗
+//	██████╔╝███████╗██║   ██║ ╚████║██║  ██╗
+//	╚═════╝ ╚══════╝╚═╝   ╚═╝  ╚═══╝╚═╝  ╚═╝
 
 /*
  * Call the Send API. The message data goes in the body. If successful, we'll
