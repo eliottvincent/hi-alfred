@@ -94,7 +94,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     case '1': {
         digitalWrite(LED_PIN, HIGH);
-        Serial.println(" is to switch LED!] ");
+        Serial.println(" is to switch LED ON!] ");
+      }
+      break;
+
+    case '2': {
+        digitalWrite(LED_PIN, LOW);
+        Serial.println(" is to switch LED OFF!] ");
       }
       break;
 
@@ -114,6 +120,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
       }
       break;
 
+    case '3': 
+      start_blink_led();
+      break;
+
+    case '4':
+      stop_blink_led();
+      break;
+
+      
     default: {
       }
       break;
@@ -165,6 +180,7 @@ void reconnect() {
 
 */
 void setup() {
+  
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
@@ -176,6 +192,7 @@ void setup() {
   Serial.println('C');
 
   setup_screen();
+  setup_led();
 }
 
 /**
@@ -222,7 +239,7 @@ void setup_screen() {
   // Turn on the backlight.
   lcd.backlight();
 
-  write_screen_message("petit test", "  walouh");
+  write_screen_message("premiere ligne", "deuxieme ligne");
 }
 
 /**
@@ -253,5 +270,50 @@ void clear_screen() {
   String empty = "                ";
   write_screen(0, 0, empty);
   write_screen(0, 1, empty);
+}
+
+
+
+
+// ██╗     ███████╗██████╗
+// ██║     ██╔════╝██╔══██╗
+// ██║     █████╗  ██║  ██║
+// ██║     ██╔══╝  ██║  ██║
+// ███████╗███████╗██████╔╝
+// ╚══════╝╚══════╝╚═════╝
+
+void setup_led() {
+  
+  pinMode(LED_PIN, OUTPUT);
+  boolean led_blinking = true;
+  
+  start_blink_led();
+  start_blink_led();
+}
+
+void switch_led_on() {
+
+}
+
+void switch_led_off() {
+
+}
+
+void switch_led() {
+
+}
+
+void start_blink_led() {
+
+    digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(500);                       // wait for a second
+    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+    delay(500);
+}
+
+
+void stop_blink_led() {
+
+  // led_blinking = false;
 }
 
