@@ -250,6 +250,12 @@ function receivedMessage(event) {
 				sendTemperatureMessage(senderID);
 				break;
 
+			case 'light':
+			case 'del':
+			case 'led':
+				sendLightMessage(senderID);
+				break;
+
 			case 'image':
 				requiresServerURL(sendImageMessage, [senderID]);
 				break;
@@ -448,10 +454,8 @@ function sendTemperatureMessage(recipientId) {
 		method: 'GET'
 	}, (error, response, body) => {
 		if (!error && response.statusCode === 200) {
-			console.log(body);
-			console.log(typeof body);
+
 			const parsedBody = JSON.parse(body);
-			console.log(parsedBody);
 			const tmp = parsedBody[0];
 
 			const messageData = {
@@ -469,6 +473,37 @@ function sendTemperatureMessage(recipientId) {
 		}
 	});
 }
+
+function sendLightMessage(recipientId) {
+
+	request({
+		uri: BLYNK_URL + 'update/D8',
+		method: 'PUT',
+		json: [
+			"low"
+		]
+	}, (error, response, body) => {
+		if (!error && response.statusCode === 200) {
+
+			const parsedBody = JSON.parse(body);
+			const tmp = parsedBody[0];
+
+			const messageData = {
+				recipient: {
+					id: recipientId
+				},
+				message: {
+					text: 'The light is on'
+				}
+			};
+
+			callSendAPI(messageData);
+		} else {
+			console.error("Failed calling Blynk API", response.statusCode, response.statusMessage, body.error);
+		}
+	});
+}
+
 
 /*
  * Send an image using the Send API.
@@ -862,6 +897,8 @@ function sendAccountLinking(recipientId) {
 
 	callSendAPI(messageData);
 }
+
+
 
 /*
  * Call the Send API. The message data goes in the body. If successful, we'll
