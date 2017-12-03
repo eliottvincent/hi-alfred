@@ -14,13 +14,20 @@ const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const express = require('express');
 const https = require('https');
+const mqtt = require('mqtt')
 const request = require('request');
 
+// Express server
 const app = express();
 app.set('port', process.env.PORT || 5000);
 app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
+
+// MQTT PubSub client
+const client  = mqtt.connect('broker.mqtt-dashboard.com');
+
+
 
 
 // App Secret can be retrieved from the App Dashboard
@@ -35,8 +42,6 @@ const PAGE_ACCESS_TOKEN = process.env.MESSENGER_PAGE_ACCESS_TOKEN;
 // URL where the app is running (include protocol). Used to point to scripts and
 // assets located at this address.
 const SERVER_URL = process.env.SERVER_URL;
-
-const BLYNK_URL = process.env.BLYNK_URL;
 
 if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 	console.error("Missing config values");
@@ -449,59 +454,32 @@ Hi! I'm Alfred 👨🏻
 
 function sendTemperatureMessage(recipientId) {
 
-	request({
-		uri: BLYNK_URL + 'get/V0',
-		method: 'GET'
-	}, (error, response, body) => {
-		if (!error && response.statusCode === 200) {
+	client.publish('HiAlfredCommand', '0');
 
-			const parsedBody = JSON.parse(body);
-			const tmp = parsedBody[0];
-
-			const messageData = {
-				recipient: {
-					id: recipientId
-				},
-				message: {
-					text: 'The temperature is actually ' + tmp + '°C'
-				}
-			};
-
-			callSendAPI(messageData);
-		} else {
-			console.error("Failed calling Blynk API", response.statusCode, response.statusMessage, body.error);
+	const tmp = 'test';
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'The temperature is actually ' + tmp + '°C'
 		}
-	});
+	};
+	callSendAPI(messageData);
 }
 
 function sendLightMessage(recipientId) {
 
-	request({
-		uri: BLYNK_URL + 'update/D8',
-		method: 'PUT',
-		json: [
-			"1"
-		]
-	}, (error, response, body) => {
-		if (!error && response.statusCode === 200) {
-
-			const parsedBody = JSON.parse(body);
-			const tmp = parsedBody[0];
-
-			const messageData = {
-				recipient: {
-					id: recipientId
-				},
-				message: {
-					text: 'I switched the light on'
-				}
-			};
-
-			callSendAPI(messageData);
-		} else {
-			console.error("Failed calling Blynk API", response.statusCode, response.statusMessage, body.error);
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'I switched the light on'
 		}
-	});
+	};
+
+	callSendAPI(messageData);
 }
 
 
@@ -933,6 +911,18 @@ function callSendAPI(messageData) {
 // certificate authority.
 app.listen(app.get('port'), function() {
 	console.log('Node app is running on port', app.get('port'));
+});
+
+// Start PubSub client
+client.on('connect', function () {
+	client.subscribe('HiAlfredData');
+	// client.publish('presence', 'Hello mqtt');
+});
+
+client.on('message', function (topic, message) {
+	// message is Buffer
+	console.log(message.toString());
+	// client.end()
 });
 
 module.exports = app;
