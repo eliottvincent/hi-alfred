@@ -28,8 +28,6 @@ app.use(express.static('public'));
 const client  = mqtt.connect('mqtt://broker.mqtt-dashboard.com');
 
 
-
-
 // App Secret can be retrieved from the App Dashboard
 const APP_SECRET = process.env.MESSENGER_APP_SECRET;
 
@@ -454,6 +452,7 @@ Hi! I'm Alfred 👨🏻
 
 function sendTemperatureMessage(recipientId) {
 
+	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '0');
 
 	const tmp = 'test';
@@ -921,13 +920,17 @@ setInterval(function () {
 
 // Start PubSub client
 client.on('connect', function () {
+
 	client.subscribe('HiAlfredData');
-	// client.publish('presence', 'Hello mqtt');
 });
 
-client.on('message', function (topic, message) {
-	// message is Buffer
-	console.log(message.toString());
+client.on('message', function (topic, message, packet) {
+
+	console.log(JSON.stringify(packet, null, 4));
+	if (topic === 'HiAlfredData') {
+
+		console.log(message.toString());
+	}
 	// client.end()
 });
 
