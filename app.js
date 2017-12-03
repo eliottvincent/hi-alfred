@@ -913,6 +913,12 @@ app.listen(app.get('port'), function() {
 	console.log('Node app is running on port', app.get('port'));
 });
 
+// workaround to avoid the app to fall in idle or sleep
+setInterval(function () {
+	https.get("https://hi-alfred.herokuapp.com/");
+}, 1200000); // every 20 minutes (20 * 6 * 1000)
+
+
 // Start PubSub client
 client.on('connect', function () {
 	client.subscribe('HiAlfredData');
@@ -924,5 +930,6 @@ client.on('message', function (topic, message) {
 	console.log(message.toString());
 	// client.end()
 });
+
 
 module.exports = app;
