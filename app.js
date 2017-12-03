@@ -243,6 +243,7 @@ function receivedMessage(event) {
 		// keywords and send back the corresponding example. Otherwise, just echo
 		// the text we received.
 		switch (messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase()) {
+
 			case 'hello':
 			case 'hi':
 				sendHiMessage(senderID);
@@ -314,6 +315,7 @@ function receivedMessage(event) {
 				break;
 
 			default:
+				console.log('bla: ' + messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase());
 				sendTextMessage(senderID, messageText);
 		}
 	} else if (messageAttachments) {
