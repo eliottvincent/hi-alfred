@@ -1,99 +1,257 @@
-/*************************************************************
-  Download latest Blynk library here:
-    https://github.com/blynkkk/blynk-library/releases/latest
-
-  Blynk is a platform with iOS and Android apps to control
-  Arduino, Raspberry Pi and the likes over the Internet.
-  You can easily build graphic interfaces for all your
-  projects by simply dragging and dropping widgets.
-
-    Downloads, docs, tutorials: http://www.blynk.cc
-    Sketch generator:           http://examples.blynk.cc
-    Blynk community:            http://community.blynk.cc
-    Follow us:                  http://www.fb.com/blynkapp
-                                http://twitter.com/blynk_app
-
-  Blynk library is licensed under MIT license
-  This example code is in public domain.
-
- *************************************************************
-
-  You’ll need:
-   - Blynk App (download from AppStore or Google Play)
-   - NodeMCU board
-   - Decide how to connect to Blynk
-     (USB, Ethernet, Wi-Fi, Bluetooth, ...)
-
-  There is a bunch of great example sketches included to show you how to get
-  started. Think of them as LEGO bricks  and combine them as you wish.
-  For example, take the Ethernet Shield sketch and combine it with the
-  Servo example, or choose a USB sketch and add a code from SendData
-  example.
- *************************************************************/
-
-/* Comment this out to disable prints and save space */
-#define BLYNK_PRINT Serial
-
-
 #include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h>
+#include <PubSubClient.h>
+#include <LiquidCrystal_I2C.h>
 
-// You should get Auth Token in the Blynk App.
-// Go to the Project Settings (nut icon).
-char auth[] = "6b5793f23a854718b45464a6dd7fa9dc";
+// Define NodeMCU A0 pin to as temperature data pin of tmp sensor
+#define TMP_PIN A0
+#define LED_PIN D8
 
-// Your WiFi credentials.
-// Set password to "" for open networks.
-char ssid[] = "Eliott's iPhone";
-char pass[] = "ntmmmmmm";
-// char ssid[] = "Livebox-B250_5GHz";
-// char pass[] = "dHzfoWW5NNdxunZtSx";
+// wifi and broker settings
+const char* ssid = "Eliott's iPhone";
+const char* password = "ntmmmmmm";
+const char* mqtt_server = "broker.mqtt-dashboard.com";
+//const char* mqtt_server = "iot.eclipse.org";
 
-int outputpin = A0;  //initializes/defines the output pin of the LM35 temperature sensor
-                    //this sets the ground pin to LOW and the input voltage pin to high
+WiFiClient espClient;
+PubSubClient client(espClient);
 
+// Construct an LCD object and pass it the
+// I2C address, width (in characters) and
+// height (in characters). Depending on the
+// Actual device, the IC2 address may change.
+LiquidCrystal_I2C lcd(0x20, 16, 2);
 
-void setup()
-{
-  // Debug console
-  Serial.begin(9600);
-
-  Serial.write("Hello");
-
-  Blynk.begin(auth, ssid, pass);
-  // You can also specify server:
-  //Blynk.begin(auth, ssid, pass, "blynk-cloud.com", 8442);
-  //Blynk.begin(auth, ssid, pass, IPAddress(192,168,1,100), 8442);
+float editedTmp = 0.0;
+char msg[50];
 
 
-  pinMode(D8, OUTPUT); 
+
+
+// ██╗    ██╗██╗███████╗██╗
+// ██║    ██║██║██╔════╝██║
+// ██║ █╗ ██║██║█████╗  ██║
+// ██║███╗██║██║██╔══╝  ██║
+// ╚███╔███╔╝██║██║     ██║
+//  ╚══╝╚══╝ ╚═╝╚═╝     ╚═╝
+
+/**
+   Sets up the WiFi connection.
+
+*/
+void setup_wifi() {
+  delay(100);
+  // We start by connecting to a WiFi network
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  randomSeed(micros());
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
-void loop()
-{
-  Blynk.run();
 
-  int analogValue = analogRead(outputpin);
-  float millivolts = (analogValue/1024.0) * 3300; //3300 is the voltage provided by NodeMCU
-  float celsius = millivolts/10;
-  Serial.print("in DegreeC=   ");
-  Serial.println(celsius);
 
-  Blynk.virtualWrite(V0, celsius);
 
-  
-  delay(1000);
-   
-  
-  // You can inject your own code or combine it with other sketches.
-  // Check other examples on how to communicate with Blynk. Remember
-  // to avoid delay() function!
+// ███╗   ███╗ ██████╗ ████████╗████████╗
+// ████╗ ████║██╔═══██╗╚══██╔══╝╚══██╔══╝
+// ██╔████╔██║██║   ██║   ██║      ██║
+// ██║╚██╔╝██║██║▄▄ ██║   ██║      ██║
+// ██║ ╚═╝ ██║╚██████╔╝   ██║      ██║
+// ╚═╝     ╚═╝ ╚══▀▀═╝    ╚═╝      ╚═╝
+
+/**
+   Callback method called on any subscribed topic's update.
+
+*/
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Topic is : [");
+  Serial.print(topic);
+  Serial.print("] Payload: ");
+  String myString = (char*) payload;  // converting the payload to raw string
+  Serial.print(myString);
+  // int p = (char)payload[0] - '0';
+  char p = (char)payload[0];
+
+  switch (p) {
+
+    case '0': {
+        Serial.print(" Temperature is: " );
+        float celsius = getTemperature();
+        Serial.println(celsius);
+        String msg = "";
+        msg = msg + celsius;
+        char message[6];
+        msg.toCharArray(message, 6);
+        client.publish("HiAlfredData", message);
+      }
+      break;
+
+    case '1': {
+        digitalWrite(LED_PIN, HIGH);
+        Serial.println(" is to switch LED!] ");
+      }
+      break;
+
+    case '+': {
+        editedTmp += 1.0;
+        String msg = "Tmp UP: ";
+        msg = msg + editedTmp;
+        write_screen_message(msg, "");
+      }
+      break;
+
+    case '-': {
+        editedTmp -= 1.0;
+        String msg = "Tmp UP: ";
+        msg = msg + editedTmp;
+        write_screen_message(msg, "");
+      }
+      break;
+
+    default: {
+      }
+      break;
+  }
+  Serial.println();
+} //end callback
+
+
+/**
+   Method aiming at reconnecting to MQTT broker if connection lost or interrupted.
+
+*/
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    //if you MQTT broker has clientID,username and password
+    //please change following line to    if (client.connect(clientId,userName,passWord))
+    if (client.connect(clientId.c_str())) {
+      Serial.println("connected");
+      //once connected to MQTT broker, subscribe to command if any
+      client.subscribe("HiAlfredCommand");
+    }
+    else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 6 seconds before retrying
+      delay(6000);
+    }
+  }
 }
 
-BLYNK_WRITE(V1)
-{   
-  int value = param.asInt(); // Get value as integer
-  digitalWrite(D8,value);
+
+
+
+// ███╗   ██╗ ██████╗ ██████╗ ███████╗███╗   ███╗ ██████╗██╗   ██╗
+// ████╗  ██║██╔═══██╗██╔══██╗██╔════╝████╗ ████║██╔════╝██║   ██║
+// ██╔██╗ ██║██║   ██║██║  ██║█████╗  ██╔████╔██║██║     ██║   ██║
+// ██║╚██╗██║██║   ██║██║  ██║██╔══╝  ██║╚██╔╝██║██║     ██║   ██║
+// ██║ ╚████║╚██████╔╝██████╔╝███████╗██║ ╚═╝ ██║╚██████╗╚██████╔╝
+// ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═════╝
+
+/**
+
+*/
+void setup() {
+  Serial.begin(115200);
+  setup_wifi();
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback); // callback function called when new data on any subscribed topic
+  Serial.print(" Starting Temparature ");
+  float celsius = getTemperature();
+  editedTmp = celsius;
+  Serial.print(celsius);
+  Serial.println('C');
+
+  setup_screen();
 }
 
+/**
+
+*/
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+}
+
+/**
+
+*/
+float getTemperature() {
+  int analogValue = analogRead(TMP_PIN);
+  float millivolts = (analogValue / 1024.0) * 3300; //3300 is the voltage provided by NodeMCU
+  float tmpCelsius = millivolts / 10;
+  return tmpCelsius;
+}
+
+
+
+
+// ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
+// ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
+// ███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║
+// ╚════██║██║     ██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║
+// ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
+// ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
+
+/**
+   Sets up the I2C screen.
+
+*/
+void setup_screen() {
+
+  // The begin call takes the width and height. This
+  // Should match the number provided to the I2C constructor.
+  lcd.begin(16, 2);
+  lcd.init();
+
+  // Turn on the backlight.
+  lcd.backlight();
+
+  write_screen_message("petit test", "  walouh");
+}
+
+/**
+   Writes a message on the screen.
+
+*/
+void write_screen_message(String firstLine, String secondLine) {
+
+  clear_screen();
+  write_screen(0, 0, firstLine);
+  write_screen(0, 1, secondLine);
+}
+
+/**
+   Writes a String at x and y position.
+
+*/
+void write_screen(int x, int y, String msg) {
+  lcd.setCursor(x, y);
+  lcd.print(msg);
+}
+
+/**
+   Clears the screen.
+
+*/
+void clear_screen() {
+  String empty = "                ";
+  write_screen(0, 0, empty);
+  write_screen(0, 1, empty);
+}
 
