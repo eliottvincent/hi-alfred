@@ -250,7 +250,7 @@ function receivedMessage(event) {
 				break;
 
 			case 'temperature':
-			case 'température':
+			case 'temprature':	// température becomes temprature
 			case 'temp':
 			case 'tmp':
 				requestTemperature(senderID);
@@ -315,7 +315,6 @@ function receivedMessage(event) {
 				break;
 
 			default:
-				console.log('bla: ' + messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase());
 				sendTextMessage(senderID, messageText);
 		}
 	} else if (messageAttachments) {
@@ -465,7 +464,7 @@ function requestTemperature(recipientId) {
 
 function sendTemperatureMessage(tmp) {
 
-	sendTypingOff(waitingUser);
+	// sendTypingOff(waitingUser);
 
 	const messageData = {
 		recipient: {
