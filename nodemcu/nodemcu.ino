@@ -75,11 +75,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("] Payload: ");
   String myString = (char*) payload;  // converting the payload to raw string
   Serial.print(myString);
+  Serial.println();
+  Serial.println("hello");
+  String topicString = topic;
+  
+  if (topicString == "HiAlfredCommand/simple") {
 
-  if (topic == "HiAlfredCommand/simple") {
-
+    Serial.println("In topic HiAlfredCommand/simple");
     char p = (char)payload[0];
 
+    Serial.println(p);
     switch (p) {
 
       case '0': {
@@ -145,9 +150,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  else if (topic == "HiAlfredCommand/set") {
+  else if (topicString == "HiAlfredCommand/set") {
+
+    Serial.println("In topic HiAlfredCommand/set");
     write_screen_message("Nouvelle temperature:", myString);
   }
+  Serial.println("bye");
   Serial.println();
 
 
@@ -303,7 +311,7 @@ void clear_screen() {
 void setup_led() {
 
   pinMode(LED_PIN, OUTPUT);
-
+  start_blink_led();
   /*
     Serial.println("the LED is currently: ");
     Serial.println(digitalRead(LED_PIN));
@@ -352,6 +360,8 @@ void start_blink_led() {
   digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
   delay(100);
   digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
 }
 
 
