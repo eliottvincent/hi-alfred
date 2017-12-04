@@ -1027,7 +1027,8 @@ setInterval(function () {
 // Start PubSub client
 client.on('connect', function () {
 
-	client.subscribe('HiAlfredData');
+	client.subscribe('HiAlfredData/tmp');
+	client.subscribe('HiAlfredData/led');
 });
 
 client.on('message', function (topic, message, packet) {

@@ -105,9 +105,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
       break;
 
     case '3': {
-        String status = digitalRead(LED_PIN);
-        char message[4];
-        status.toCharArray(message, 4);
+        String status = "";
+        status = status + digitalRead(LED_PIN);
+        Serial.println("LED status is ");
+        Serial.println(status);
+        char message[1];
+        status.toCharArray(message, 1);
         client.publish("HiAlfredData/led", message);
       }
       break;
@@ -127,11 +130,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         write_screen_message(msg, "");
       }
       break;
-
-    case '3':
-      start_blink_led();
-      break;
-
+      
     case '4':
       stop_blink_led();
       break;
