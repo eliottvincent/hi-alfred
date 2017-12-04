@@ -93,13 +93,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
       break;
 
     case '1': {
-        digitalWrite(LED_PIN, HIGH);
+        switch_led_on();
         Serial.println(" is to switch LED ON!] ");
       }
       break;
 
     case '2': {
-        digitalWrite(LED_PIN, LOW);
+        switch_led_off();
         Serial.println(" is to switch LED OFF!] ");
       }
       break;
@@ -120,7 +120,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       }
       break;
 
-    case '3': 
+    case '3':
       start_blink_led();
       break;
 
@@ -128,7 +128,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       stop_blink_led();
       break;
 
-      
+
     default: {
       }
       break;
@@ -180,7 +180,7 @@ void reconnect() {
 
 */
 void setup() {
-  
+
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
@@ -283,20 +283,20 @@ void clear_screen() {
 // ╚══════╝╚══════╝╚═════╝
 
 void setup_led() {
-  
+
   pinMode(LED_PIN, OUTPUT);
   boolean led_blinking = true;
-  
+
   start_blink_led();
   start_blink_led();
 }
 
 void switch_led_on() {
-
+  digitalWrite(LED_PIN, HIGH);
 }
 
 void switch_led_off() {
-
+  digitalWrite(LED_PIN, LOW);
 }
 
 void switch_led() {
@@ -305,38 +305,38 @@ void switch_led() {
 
 void start_blink_led() {
 
-    digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
-        digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-    delay(100);                       // wait for a second
-    digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-    delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
+  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(100);                       // wait for a second
+  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(100);
 }
 
 

@@ -256,12 +256,6 @@ function receivedMessage(event) {
 				requestTemperature(senderID);
 				break;
 
-			case 'light':
-			case 'del':
-			case 'led':
-				sendLightMessage(senderID);
-				break;
-
 			case '+':
 			case 'up':
 				requestUpTemperature(senderID);
@@ -270,6 +264,14 @@ function receivedMessage(event) {
 			case '-':
 			case 'down':
 				requestDownTemperature(senderID);
+				break;
+
+			case 'on':
+				requestLightOn(recipientID);
+				break;
+
+			case 'off':
+				requestLightOff(recipientID);
 				break;
 
 			case 'image':
@@ -472,7 +474,7 @@ function requestTemperature(recipientId) {
 	sendTypingOn(recipientId);
 }
 
-function requestUpTemperature(recipientId) {
+function requestLightOn(recipientId) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '+');
@@ -483,6 +485,36 @@ function requestUpTemperature(recipientId) {
 		},
 		message: {
 			text: 'UP temperature'
+		}
+	};
+	callSendAPI(messageData);
+}
+function requestLightOff(recipientId) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand', '1');
+
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'I switched the light on'
+		}
+	};
+	callSendAPI(messageData);
+}
+function requestUpTemperature(recipientId) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand', '2');
+
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'I switched the light off'
 		}
 	};
 	callSendAPI(messageData);
@@ -980,7 +1012,7 @@ client.on('connect', function () {
 client.on('message', function (topic, message, packet) {
 
 	console.log(JSON.stringify(packet, null, 4));
-	
+
 	if (topic === 'HiAlfredData') {
 
 		console.log(message.toString());
