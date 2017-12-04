@@ -262,7 +262,7 @@ function receivedMessage(event) {
 
 			if (nlp.hasOwnProperty('entities') && nlp.entities.hasOwnProperty('temperature')) {
 
-				const tmp = nlp.entities.temperature[0].value;
+				const tmp = nlp.entities.temperature[0].value.toString();
 				requestTemperatureSet(tmp, senderID);
 			}
 			else {

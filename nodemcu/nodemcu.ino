@@ -306,16 +306,17 @@ void clear_screen() {
 void setup_led() {
 
   pinMode(LED_PIN, OUTPUT);
-  Serial.println("the LED is currently: ");
-  Serial.println(digitalRead(LED_PIN));
-  Serial.println("");
-  Serial.println("Switching the LED on...");
 
-  switch_led_on();
-  
-  Serial.println("the LED is now: ");
-  Serial.println(digitalRead(LED_PIN));
-  Serial.println("");
+  /*
+    Serial.println("the LED is currently: ");
+    Serial.println(digitalRead(LED_PIN));
+    Serial.println("");
+    Serial.println("Switching the LED on...");
+    switch_led_on();
+    Serial.println("the LED is now: ");
+    Serial.println(digitalRead(LED_PIN));
+    Serial.println("");
+  */
 }
 
 void switch_led_on() {
