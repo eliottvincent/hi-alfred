@@ -483,6 +483,8 @@ Hi! I'm Alfred 👨🏻
 
 function sendLedMessage(status) {
 
+	console.log('sendLedMessage is triggered: ' + status);
+
 	const st = (status === 0 ? 'éteinte' : 'allumée');
 	const stBis = (status === 0 ? 'allumer' : 'éteindre');
 	const messageData = {
@@ -1088,8 +1090,10 @@ client.on('message', function (topic, message, packet) {
 
 		console.log(message.toString());
 
+		console.log('waitingUser: ' + waitingUser);
 		if (waitingUser !== "") {
 
+			console.log('sendLedMessage will be triggered: ' + message);
 			sendLedMessage(message);
 		}
 	}

@@ -116,9 +116,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
       break;
 
 
-    case '4':
+    case '4': {
       int status = digitalRead(LED_PIN);
       switch_led();
+    }
       break;
 
     case '+': {
