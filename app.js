@@ -394,6 +394,10 @@ function receivedPostback(event) {
 			sendLedSetNoMessage(senderID);
 			break;
 
+		case 'RESTART':
+			sendHiMessage(senderID);
+			break;
+
 		default:
 			sendTextMessage(senderID, "Postback called");
 			break;
@@ -491,18 +495,7 @@ function sendLedMessage(status) {
 			id: waitingUser
 		},
 		message: {
-			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?',
-			quick_replies: [
-				{
-					"content_type":"text",
-					"title":"Oui",
-					"payload":"LED_SET_YES"
-				},				{
-					"content_type":"text",
-					"title":"Non",
-					"payload":"LED_SET_NO"
-				}
-			]
+			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?'
 		}
 	};
 
