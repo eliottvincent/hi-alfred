@@ -222,6 +222,7 @@ function receivedMessage(event) {
 	const messageText = message.text;
 	const messageAttachments = message.attachments;
 	const quickReply = message.quick_reply;
+	const nlp = message.nlp;
 
 	if (isEcho) {
 		// Just logging message echoes to console
@@ -380,9 +381,16 @@ function receivedPostback(event) {
 	console.log("Received postback for user %d and page %d with payload '%s' " +
 		"at %d", senderID, recipientID, payload, timeOfPostback);
 
-	// When a postback is called, we'll send a message back to the sender to
-	// let them know it was successful
-	sendTextMessage(senderID, "Postback called");
+	switch (payload) {
+
+		case 'LED':
+			requestLedStatus(recipientID);
+			break;
+
+		default:
+			sendTextMessage(senderID, "Postback called");
+			break;
+	}
 }
 
 /*
@@ -462,6 +470,33 @@ Hi! I'm Alfred 👨🏻
 	};
 
 	callSendAPI(messageData);
+}
+
+
+function sendLedMessage(status) {
+
+	const messageData = {
+		recipient: {
+			id: waitingUser
+		},
+		message: {
+			text: 'The light is currently ' + status
+		}
+	};
+
+	callSendAPI(messageData);
+
+	waitingUser = "";
+}
+
+function requestLedStatus(recipientId) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand', '3');
+
+	waitingUser = recipientId;
+
+	sendTypingOn(recipientId);
 }
 
 function requestTemperature(recipientId) {
@@ -550,20 +585,6 @@ function sendTemperatureMessage(tmp) {
 	callSendAPI(messageData);
 
 	waitingUser = "";
-}
-
-function sendLightMessage(recipientId) {
-
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			text: 'I switched the light on'
-		}
-	};
-
-	callSendAPI(messageData);
 }
 
 
@@ -1013,12 +1034,22 @@ client.on('message', function (topic, message, packet) {
 
 	console.log(JSON.stringify(packet, null, 4));
 
-	if (topic === 'HiAlfredData') {
+	if (topic === 'HiAlfredData/tmp') {
 
 		console.log(message.toString());
 		if (waitingUser !== "") {
 
 			sendTemperatureMessage(message);
+		}
+	}
+
+	if (topic === 'HiAlfredData/led') {
+
+		console.log(message.toString());
+
+		if (waitingUser !== "") {
+
+			sendLedMessage(message);
 		}
 	}
 	// client.end()

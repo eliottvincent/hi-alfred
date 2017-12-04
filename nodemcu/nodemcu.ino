@@ -88,7 +88,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         msg = msg + celsius;
         char message[6];
         msg.toCharArray(message, 6);
-        client.publish("HiAlfredData", message);
+        client.publish("HiAlfredData/tmp", message);
       }
       break;
 
@@ -101,6 +101,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     case '2': {
         switch_led_off();
         Serial.println(" is to switch LED OFF!] ");
+      }
+      break;
+
+    case '3': {
+        String status = digitalRead(LED_PIN);
+        char message[4];
+        status.toCharArray(message, 4);
+        client.publish("HiAlfredData/led", message);
       }
       break;
 
