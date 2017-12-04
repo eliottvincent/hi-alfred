@@ -484,8 +484,8 @@ function sendLedMessage(status) {
 
 	console.log('sendLedMessage is triggered: ' + status);
 
-	const st = (status === 0 ? 'éteinte' : 'allumée');
-	const stBis = (status === 0 ? 'allumer' : 'éteindre');
+	const st = (status === '0' ? 'éteinte' : 'allumée');
+	const stBis = (status === '0' ? 'allumer' : 'éteindre');
 	const messageData = {
 		recipient: {
 			id: waitingUser
