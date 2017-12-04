@@ -46,7 +46,6 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 }
 
 let waitingUser = "";
-let userWantsToSetTmp = false;
 
 /*
  * Use your own validation token. Check that the token used in the Webhook
@@ -227,30 +226,44 @@ function receivedMessage(event) {
 
 	if (isEcho) {
 		// Just logging message echoes to console
-		console.log("Received echo for message %s and app %d with metadata %s",
-			messageId, appId, metadata);
+		console.log("Received echo for message %s and app %d with metadata %s", messageId, appId, metadata);
 		return;
-	} else if (quickReply) {
-		const quickReplyPayload = quickReply.payload;
-		console.log("Quick reply for message %s with payload %s",
-			messageId, quickReplyPayload);
+	}
+	else if (quickReply) {
 
-		sendTextMessage(senderID, "Quick reply tapped");
+		const quickReplyPayload = quickReply.payload;
+		console.log("Quick reply for message %s with payload %s", messageId, quickReplyPayload);
+
+		switch(quickReplyPayload) {
+
+			case 'LED_SET_YES':
+				requestLedSet(senderID);
+				break;
+
+			case 'LED_SET_NO':
+				sendLedSetNoMessage(senderID);
+				break;
+
+			default:
+				sendTextMessage(senderID, "Quick reply tapped");
+				break;
+		}
 		return;
 	}
 
 	if (messageText) {
 
-		// If we receive a text message, check to see if it matches any special
-		// keywords and send back the corresponding example. Otherwise, just echo
-		// the text we received.
-
-		if (userWantsToSetTmp === true) {
+		// if the user is in the process of setting the temperature
+		if (metadata === 'SET_TMP') {
 
 			if (nlp.hasOwnProperty('temperature')) {
 
 				const tmp = nlp.temperature.value;
-				requestTemperatureSet(tmp)
+				requestTemperatureSet(tmp, senderID);
+			}
+			else {
+
+				requestTemperatureSet(messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase(), senderID);
 			}
 		}
 
@@ -400,14 +413,6 @@ function receivedPostback(event) {
 			requestLedStatus(senderID);
 			break;
 
-		case 'LED_SET_YES':
-			requestLedSet(senderID);
-			break;
-
-		case 'LED_SET_NO':
-			sendLedSetNoMessage(senderID);
-			break;
-
 		case 'TMP_SENSOR_GET':
 			requestTemperature(senderID);
 			break;
@@ -540,14 +545,27 @@ function sendLedMessage(status) {
 
 function sendTemperatureSetMessage(recipientID) {
 
-	userWantsToSetTmp = true;
-
 	const messageData = {
 		recipient: {
 			id: recipientID
 		},
 		message: {
 			text: 'À quelle température souhaitez-vous réguler votre pièce ?',
+			metadata: 'SET_TMP'
+		}
+	};
+
+	callSendAPI(messageData);
+}
+
+function sendLedSetNoMessage(recipientID) {
+
+	const messageData = {
+		recipient: {
+			id: recipientID
+		},
+		message: {
+			text: 'Ok 🤷🏼‍♂️',
 
 		}
 	};
@@ -560,23 +578,27 @@ function requestLedStatus(senderID) {
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand/simple', '3');
 
-	console.log('senderID: ' + senderID);
 	waitingUser = senderID;
-	console.log('waitingUser : ' + waitingUser );
 
-	sendTypingOn(senderID);
+	sendTypingOn(waitingUser);
 }
 
-function requestTemperatureSet(tmp) {
+function requestTemperatureSet(tmp, recipientID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand/set', tmp);
 
-	console.log('senderID: ' + senderID);
-	waitingUser = senderID;
-	console.log('waitingUser : ' + waitingUser );
+	const messageData = {
+		recipient: {
+			id: recipientID
+		},
+		message: {
+			text: 'Le changement de température a été transmis.',
 
-	sendTypingOn(senderID);
+		}
+	};
+
+	callSendAPI(messageData);
 }
 
 function requestLedSet(senderID) {
