@@ -146,10 +146,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
   else if (topic == "HiAlfredCommand/set") {
-    char p = (char)payload[6];
-    String tmp = "";
-    String(tmp + p);
-    write_screen_message("Nouvelle temperature:", tmp);
+    write_screen_message("Nouvelle temperature:", myString);
   }
   Serial.println();
 
@@ -329,10 +326,10 @@ void switch_led_off() {
 
 void switch_led() {
   if (digitalRead(LED_PIN) == 0) {
-    switch_led_off();
+    switch_led_on();
   }
   else {
-    switch_led_on();
+    switch_led_off();
   }
 }
 

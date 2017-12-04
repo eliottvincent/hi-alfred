@@ -297,14 +297,6 @@ function receivedMessage(event) {
 					requestDownTemperature(senderID);
 					break;
 
-				case 'on':
-					requestLightOn(senderID);
-					break;
-
-				case 'off':
-					requestLightOff(senderID);
-					break;
-
 				case 'read receipt':
 					sendReadReceipt(senderID);
 					break;
@@ -479,8 +471,8 @@ function sendLedMessage(status) {
 
 	console.log('sendLedMessage is triggered: ' + status);
 
-	const st = (status === '1' ? 'éteinte' : 'allumée');
-	const stBis = (status === '1' ? 'allumer' : 'éteindre');
+	const st = (status === '0' ? 'éteinte' : 'allumée');
+	const stBis = (status === '0' ? 'allumer' : 'éteindre');
 	const messageData = {
 		recipient: {
 			id: waitingUser
@@ -592,36 +584,6 @@ function requestTemperature(senderID) {
 	sendTypingOn(senderID);
 }
 
-function requestLightOn(senderID) {
-
-	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand/simple', '+');
-
-	const messageData = {
-		recipient: {
-			id: senderID
-		},
-		message: {
-			text: 'I switched the light on'
-		}
-	};
-	callSendAPI(messageData);
-}
-function requestLightOff(senderID) {
-
-	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand/simple', '-');
-
-	const messageData = {
-		recipient: {
-			id: senderID
-		},
-		message: {
-			text: 'I switched the light off'
-		}
-	};
-	callSendAPI(messageData);
-}
 function requestUpTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
