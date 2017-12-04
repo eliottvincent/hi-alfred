@@ -72,78 +72,88 @@ void setup_wifi() {
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Topic is : [");
   Serial.print(topic);
-  Serial.print("] Payload: ");
-  String myString = (char*) payload;  // converting the payload to raw string
-  Serial.print(myString);
-  // int p = (char)payload[0] - '0';
-  char p = (char)payload[0];
+   Serial.print("] Payload: ");
+      String myString = (char*) payload;  // converting the payload to raw string
+      Serial.print(myString);
+  if (topic == "HiAlfredCommand/simple") {
+     
+    char p = (char)payload[0];
 
-  switch (p) {
+    switch (p) {
 
-    case '0': {
-        Serial.print(" Temperature is: " );
-        float celsius = getTemperature();
-        Serial.println(celsius);
-        String msg = "";
-        msg = msg + celsius;
-        char message[6];
-        msg.toCharArray(message, 6);
-        client.publish("HiAlfredData/tmp", message);
-      }
-      break;
+      case '0': {
+          Serial.print(" Temperature is: " );
+          float celsius = getTemperature();
+          Serial.println(celsius);
+          String msg = "";
+          msg = msg + celsius;
+          char message[6];
+          msg.toCharArray(message, 6);
+          client.publish("HiAlfredData/tmp", message);
+        }
+        break;
 
-    case '1': {
-        switch_led_on();
-        Serial.println(" is to switch LED ON!] ");
-      }
-      break;
+      case '1': {
+          switch_led_on();
+          Serial.println(" is to switch LED ON!] ");
+        }
+        break;
 
-    case '2': {
-        switch_led_off();
-        Serial.println(" is to switch LED OFF!] ");
-      }
-      break;
+      case '2': {
+          switch_led_off();
+          Serial.println(" is to switch LED OFF!] ");
+        }
+        break;
 
-    case '3': {
-        String status = "";
-        status = status + digitalRead(LED_PIN);
-        Serial.println("LED status is ");
-        Serial.println(status);
-        char message[4];
-        status.toCharArray(message, 4);
-        client.publish("HiAlfredData/led", message);
-      }
-      break;
+      case '3': {
+          String status = "";
+          status = status + digitalRead(LED_PIN);
+          Serial.println("LED status is ");
+          Serial.println(status);
+          char message[4];
+          status.toCharArray(message, 4);
+          client.publish("HiAlfredData/led", message);
+        }
+        break;
+
+      case '4': {
+          int status = digitalRead(LED_PIN);
+          switch_led();
+        }
+        break;
+
+      case '+': {
+          editedTmp += 1.0;
+          String msg = "Tmp UP: ";
+          msg = msg + editedTmp;
+          write_screen_message(msg, "");
+        }
+        break;
+
+      case '-': {
+          editedTmp -= 1.0;
+          String msg = "Tmp UP: ";
+          msg = msg + editedTmp;
+          write_screen_message(msg, "");
+        }
+        break;
 
 
-    case '4': {
-      int status = digitalRead(LED_PIN);
-      switch_led();
+      default: {
+        }
+        break;
     }
-      break;
-
-    case '+': {
-        editedTmp += 1.0;
-        String msg = "Tmp UP: ";
-        msg = msg + editedTmp;
-        write_screen_message(msg, "");
-      }
-      break;
-
-    case '-': {
-        editedTmp -= 1.0;
-        String msg = "Tmp UP: ";
-        msg = msg + editedTmp;
-        write_screen_message(msg, "");
-      }
-      break;
-      
-
-    default: {
-      }
-      break;
+    Serial.println();
   }
-  Serial.println();
+
+  else if (topic == "HiAlfredCommand/set") {
+    char p = (char)payload[6];
+    String tmp = "";
+    String(tmp + p);
+    write_screen_message("Nouvelle temperature:", tmp);
+  }
+
+
 } //end callback
 
 
@@ -164,7 +174,8 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       //once connected to MQTT broker, subscribe to command if any
-      client.subscribe("HiAlfredCommand");
+      client.subscribe("HiAlfredCommand/set");
+      client.subscribe("HiAlfredCommand/simple");
     }
     else {
       Serial.print("failed, rc=");
@@ -310,12 +321,12 @@ void switch_led_off() {
 }
 
 void switch_led() {
-    if (digitalRead(LED_PIN) == 0) {
-      switch_led_on();
-    }
-    else {
-      switch_led_off();
-    }
+  if (digitalRead(LED_PIN) == 0) {
+    switch_led_on();
+  }
+  else {
+    switch_led_off();
+  }
 }
 
 void start_blink_led() {

@@ -46,6 +46,7 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 }
 
 let waitingUser = "";
+let userWantsToSetTmp = false;
 
 /*
  * Use your own validation token. Check that the token used in the Webhook
@@ -243,6 +244,18 @@ function receivedMessage(event) {
 		// If we receive a text message, check to see if it matches any special
 		// keywords and send back the corresponding example. Otherwise, just echo
 		// the text we received.
+
+		if (userWantsToSetTmp === true) {
+
+			if (nlp.hasOwnProperty('temperature')) {
+
+				const tmp = nlp.temperature.value;
+				requestTemperatureSet(tmp)
+			}
+		}
+
+		else {
+
 		switch (messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase()) {
 
 			case 'hello':
@@ -330,6 +343,7 @@ function receivedMessage(event) {
 			default:
 				sendTextMessage(senderID, messageText);
 		}
+		}
 	} else if (messageAttachments) {
 		sendTextMessage(senderID, "Message with attachment received");
 	}
@@ -392,6 +406,14 @@ function receivedPostback(event) {
 
 		case 'LED_SET_NO':
 			sendLedSetNoMessage(senderID);
+			break;
+
+		case 'TMP_SENSOR_GET':
+			requestTemperature(senderID);
+			break;
+
+		case 'TMP_SENSOR_SET':
+			sendTemperatureSetMessage(senderID);
 			break;
 
 		case 'RESTART':
@@ -504,10 +526,39 @@ function sendLedMessage(status) {
 	waitingUser = "";
 }
 
+function sendTemperatureSetMessage(recipientID) {
+
+	userWantsToSetTmp = true;
+
+	const messageData = {
+		recipient: {
+			id: recipientID
+		},
+		message: {
+			text: 'À quelle température souhaitez-vous réguler votre pièce ?',
+
+		}
+	};
+
+	callSendAPI(messageData);
+}
+
 function requestLedStatus(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '3');
+	client.publish('HiAlfredCommand/simple', '3');
+
+	console.log('senderID: ' + senderID);
+	waitingUser = senderID;
+	console.log('waitingUser : ' + waitingUser );
+
+	sendTypingOn(senderID);
+}
+
+function requestTemperatureSet(tmp) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand/set', tmp);
 
 	console.log('senderID: ' + senderID);
 	waitingUser = senderID;
@@ -519,7 +570,7 @@ function requestLedStatus(senderID) {
 function requestLedSet(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '4');
+	client.publish('HiAlfredCommand/simple', '4');
 
 	const messageData = {
 		recipient: {
@@ -535,7 +586,7 @@ function requestLedSet(senderID) {
 function requestTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '0');
+	client.publish('HiAlfredCommand/simple', '0');
 
 	waitingUser = senderID;
 
@@ -545,7 +596,7 @@ function requestTemperature(senderID) {
 function requestLightOn(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '+');
+	client.publish('HiAlfredCommand/simple', '+');
 
 	const messageData = {
 		recipient: {
@@ -560,7 +611,7 @@ function requestLightOn(senderID) {
 function requestLightOff(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '-');
+	client.publish('HiAlfredCommand/simple', '-');
 
 	const messageData = {
 		recipient: {
@@ -575,7 +626,7 @@ function requestLightOff(senderID) {
 function requestUpTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '2');
+	client.publish('HiAlfredCommand/simple', '2');
 
 	const messageData = {
 		recipient: {
@@ -591,7 +642,7 @@ function requestUpTemperature(senderID) {
 function requestDownTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '-');
+	client.publish('HiAlfredCommand/simple', '-');
 
 	const messageData = {
 		recipient: {
