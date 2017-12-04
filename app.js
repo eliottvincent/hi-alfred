@@ -979,7 +979,8 @@ client.on('connect', function () {
 
 client.on('message', function (topic, message, packet) {
 
-	// console.log(JSON.stringify(packet, null, 4));
+	console.log(JSON.stringify(packet, null, 4));
+	
 	if (topic === 'HiAlfredData') {
 
 		console.log(message.toString());
