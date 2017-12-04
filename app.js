@@ -484,7 +484,7 @@ function requestLightOn(recipientId) {
 			id: recipientId
 		},
 		message: {
-			text: 'UP temperature'
+			text: 'I switched the light on'
 		}
 	};
 	callSendAPI(messageData);
@@ -492,14 +492,14 @@ function requestLightOn(recipientId) {
 function requestLightOff(recipientId) {
 
 	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand', '1');
+	client.publish('HiAlfredCommand', '-');
 
 	const messageData = {
 		recipient: {
 			id: recipientId
 		},
 		message: {
-			text: 'I switched the light on'
+			text: 'I switched the light off'
 		}
 	};
 	callSendAPI(messageData);
@@ -514,7 +514,7 @@ function requestUpTemperature(recipientId) {
 			id: recipientId
 		},
 		message: {
-			text: 'I switched the light off'
+			text: 'UP temperature'
 		}
 	};
 	callSendAPI(messageData);
