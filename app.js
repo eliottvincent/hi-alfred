@@ -509,7 +509,9 @@ function requestLedStatus(senderID) {
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '3');
 
+	console.log('senderID: ' + senderID);
 	waitingUser = senderID;
+	console.log('waitingUser : ' + waitingUser );
 
 	sendTypingOn(senderID);
 }
