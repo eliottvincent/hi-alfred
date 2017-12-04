@@ -79,6 +79,7 @@ app.post('/webhook', function (req, res) {
 		// Iterate over each entry
 		// There may be multiple if batched
 		data.entry.forEach(function(pageEntry) {
+
 			const pageID = pageEntry.id;
 			const timeOfEvent = pageEntry.time;
 
@@ -256,9 +257,9 @@ function receivedMessage(event) {
 		// if the user is in the process of setting the temperature
 		if (metadata === 'SET_TMP') {
 
-			if (nlp.hasOwnProperty('temperature')) {
+			if (nlp.hasOwnProperty('entities') && nlp.entities.hasOwnProperty('temperature')) {
 
-				const tmp = nlp.temperature.value;
+				const tmp = nlp.entities.temperature[0].value;
 				requestTemperatureSet(tmp, senderID);
 			}
 			else {
