@@ -46,6 +46,7 @@ if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
 }
 
 let waitingUser = "";
+let userIsSettingTemperature = false;
 
 /*
  * Use your own validation token. Check that the token used in the Webhook
@@ -255,7 +256,9 @@ function receivedMessage(event) {
 	if (messageText) {
 
 		// if the user is in the process of setting the temperature
-		if (metadata === 'SET_TMP') {
+		if (userIsSettingTemperature === true) {
+
+			userIsSettingTemperature = false;
 
 			if (nlp.hasOwnProperty('entities') && nlp.entities.hasOwnProperty('temperature')) {
 
@@ -270,93 +273,53 @@ function receivedMessage(event) {
 
 		else {
 
-		switch (messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase()) {
+			switch (messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase()) {
 
-			case 'hello':
-			case 'hi':
-				sendHiMessage(senderID);
-				break;
+				case 'hello':
+				case 'hi':
+					sendHiMessage(senderID);
+					break;
 
-			case 'temperature':
-			case 'temprature':	// température becomes temprature
-			case 'temp':
-			case 'tmp':
-				requestTemperature(senderID);
-				break;
+				case 'temperature':
+				case 'temprature':	// température becomes temprature
+				case 'temp':
+				case 'tmp':
+					requestTemperature(senderID);
+					break;
 
-			case '+':
-			case 'up':
-				requestUpTemperature(senderID);
-				break;
+				case '+':
+				case 'up':
+					requestUpTemperature(senderID);
+					break;
 
-			case '-':
-			case 'down':
-				requestDownTemperature(senderID);
-				break;
+				case '-':
+				case 'down':
+					requestDownTemperature(senderID);
+					break;
 
-			case 'on':
-				requestLightOn(senderID);
-				break;
+				case 'on':
+					requestLightOn(senderID);
+					break;
 
-			case 'off':
-				requestLightOff(senderID);
-				break;
+				case 'off':
+					requestLightOff(senderID);
+					break;
 
-			case 'image':
-				requiresServerURL(sendImageMessage, [senderID]);
-				break;
+				case 'read receipt':
+					sendReadReceipt(senderID);
+					break;
 
-			case 'gif':
-				requiresServerURL(sendGifMessage, [senderID]);
-				break;
+				case 'typing on':
+					sendTypingOn(senderID);
+					break;
 
-			case 'audio':
-				requiresServerURL(sendAudioMessage, [senderID]);
-				break;
+				case 'typing off':
+					sendTypingOff(senderID);
+					break;
 
-			case 'video':
-				requiresServerURL(sendVideoMessage, [senderID]);
-				break;
-
-			case 'file':
-				requiresServerURL(sendFileMessage, [senderID]);
-				break;
-
-			case 'button':
-				sendButtonMessage(senderID);
-				break;
-
-			case 'generic':
-				requiresServerURL(sendGenericMessage, [senderID]);
-				break;
-
-			case 'receipt':
-				requiresServerURL(sendReceiptMessage, [senderID]);
-				break;
-
-			case 'quick reply':
-				sendQuickReply(senderID);
-				break;
-
-			case 'read receipt':
-				sendReadReceipt(senderID);
-				break;
-
-			case 'typing on':
-				sendTypingOn(senderID);
-				break;
-
-			case 'typing off':
-				sendTypingOff(senderID);
-				break;
-
-			case 'account linking':
-				requiresServerURL(sendAccountLinking, [senderID]);
-				break;
-
-			default:
-				sendTextMessage(senderID, messageText);
-		}
+				default:
+					sendTextMessage(senderID, messageText);
+			}
 		}
 	} else if (messageAttachments) {
 		sendTextMessage(senderID, "Message with attachment received");
@@ -546,13 +509,14 @@ function sendLedMessage(status) {
 
 function sendTemperatureSetMessage(recipientID) {
 
+	userIsSettingTemperature = true;
+
 	const messageData = {
 		recipient: {
 			id: recipientID
 		},
 		message: {
-			text: 'À quelle température souhaitez-vous réguler votre pièce ?',
-			metadata: 'SET_TMP'
+			text: 'À quelle température souhaitez-vous réguler votre pièce ?'
 		}
 	};
 
@@ -707,115 +671,7 @@ function sendTemperatureMessage(tmp) {
 }
 
 
-/*
- * Send an image using the Send API.
- *
- */
-function sendImageMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "image",
-				payload: {
-					url: SERVER_URL + "/assets/rift.png"
-				}
-			}
-		}
-	};
 
-	callSendAPI(messageData);
-}
-
-/*
- * Send a Gif using the Send API.
- *
- */
-function sendGifMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "image",
-				payload: {
-					url: SERVER_URL + "/assets/instagram_logo.gif"
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send audio using the Send API.
- *
- */
-function sendAudioMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "audio",
-				payload: {
-					url: SERVER_URL + "/assets/sample.mp3"
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send a video using the Send API.
- *
- */
-function sendVideoMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "video",
-				payload: {
-					url: SERVER_URL + "/assets/allofus480.mov"
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send a file using the Send API.
- *
- */
-function sendFileMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "file",
-				payload: {
-					url: SERVER_URL + "/assets/test.txt"
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
 
 /*
  * Send a text message using the Send API.
@@ -829,193 +685,6 @@ function sendTextMessage(recipientId, messageText) {
 		message: {
 			text: messageText,
 			metadata: "DEVELOPER_DEFINED_METADATA"
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send a button message using the Send API.
- *
- */
-function sendButtonMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "template",
-				payload: {
-					template_type: "button",
-					text: "This is test text",
-					buttons:[{
-						type: "web_url",
-						url: "https://www.oculus.com/en-us/rift/",
-						title: "Open Web URL"
-					}, {
-						type: "postback",
-						title: "Trigger Postback",
-						payload: "DEVELOPER_DEFINED_PAYLOAD"
-					}, {
-						type: "phone_number",
-						title: "Call Phone Number",
-						payload: "+16505551234"
-					}]
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send a Structured Message (Generic Message type) using the Send API.
- *
- */
-function sendGenericMessage(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "template",
-				payload: {
-					template_type: "generic",
-					elements: [{
-						title: "rift",
-						subtitle: "Next-generation virtual reality",
-						item_url: "https://www.oculus.com/en-us/rift/",
-						image_url: SERVER_URL + "/assets/rift.png",
-						buttons: [{
-							type: "web_url",
-							url: "https://www.oculus.com/en-us/rift/",
-							title: "Open Web URL"
-						}, {
-							type: "postback",
-							title: "Call Postback",
-							payload: "Payload for first bubble",
-						}],
-					}, {
-						title: "touch",
-						subtitle: "Your Hands, Now in VR",
-						item_url: "https://www.oculus.com/en-us/touch/",
-						image_url: SERVER_URL + "/assets/touch.png",
-						buttons: [{
-							type: "web_url",
-							url: "https://www.oculus.com/en-us/touch/",
-							title: "Open Web URL"
-						}, {
-							type: "postback",
-							title: "Call Postback",
-							payload: "Payload for second bubble",
-						}]
-					}]
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send a receipt message using the Send API.
- *
- */
-function sendReceiptMessage(recipientId) {
-	// Generate a random receipt ID as the API requires a unique ID
-	const receiptId = "order" + Math.floor(Math.random()*1000);
-
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message:{
-			attachment: {
-				type: "template",
-				payload: {
-					template_type: "receipt",
-					recipient_name: "Peter Chang",
-					order_number: receiptId,
-					currency: "USD",
-					payment_method: "Visa 1234",
-					timestamp: "1428444852",
-					elements: [{
-						title: "Oculus Rift",
-						subtitle: "Includes: headset, sensor, remote",
-						quantity: 1,
-						price: 599.00,
-						currency: "USD",
-						image_url: SERVER_URL + "/assets/riftsq.png"
-					}, {
-						title: "Samsung Gear VR",
-						subtitle: "Frost White",
-						quantity: 1,
-						price: 99.99,
-						currency: "USD",
-						image_url: SERVER_URL + "/assets/gearvrsq.png"
-					}],
-					address: {
-						street_1: "1 Hacker Way",
-						street_2: "",
-						city: "Menlo Park",
-						postal_code: "94025",
-						state: "CA",
-						country: "US"
-					},
-					summary: {
-						subtotal: 698.99,
-						shipping_cost: 20.00,
-						total_tax: 57.67,
-						total_cost: 626.66
-					},
-					adjustments: [{
-						name: "New Customer Discount",
-						amount: -50
-					}, {
-						name: "$100 Off Coupon",
-						amount: -100
-					}]
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-/*
- * Send a message with Quick Reply buttons.
- *
- */
-function sendQuickReply(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			text: "What's your favorite movie genre?",
-			quick_replies: [
-				{
-					"content_type":"text",
-					"title":"Action",
-					"payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-				},
-				{
-					"content_type":"text",
-					"title":"Comedy",
-					"payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
-				},
-				{
-					"content_type":"text",
-					"title":"Drama",
-					"payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
-				}
-			]
 		}
 	};
 
@@ -1073,32 +742,6 @@ function sendTypingOff(recipientId) {
 	callSendAPI(messageData);
 }
 
-/*
- * Send a message with the account linking call-to-action
- *
- */
-function sendAccountLinking(recipientId) {
-	const messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "template",
-				payload: {
-					template_type: "button",
-					text: "Welcome. Link your account.",
-					buttons:[{
-						type: "account_link",
-						url: SERVER_URL + "/authorize"
-					}]
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
 
 /*
  * Call the Send API. The message data goes in the body. If successful, we'll

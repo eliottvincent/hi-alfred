@@ -306,10 +306,16 @@ void clear_screen() {
 void setup_led() {
 
   pinMode(LED_PIN, OUTPUT);
-  boolean led_blinking = true;
+  Serial.println("the LED is currently: ");
+  Serial.println(digitalRead(LED_PIN));
+  Serial.println("");
+  Serial.println("Switching the LED on...");
 
-  start_blink_led();
-  start_blink_led();
+  switch_led_on();
+  
+  Serial.println("the LED is now: ");
+  Serial.println(digitalRead(LED_PIN));
+  Serial.println("");
 }
 
 void switch_led_on() {
@@ -348,21 +354,6 @@ void start_blink_led() {
   digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
   delay(100);
   digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a second
-  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
-  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a second
-  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
-  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a second
-  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
-  digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a second
-  digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);
 }
 
 
