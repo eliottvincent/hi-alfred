@@ -9,7 +9,7 @@
 // wifi and broker settings
 const char* ssid = "Eliott's iPhone";
 const char* password = "ntmmmmmm";
-const char* mqtt_server = "broker.mqtt-dashboard.com";
+const char* mqtt_server = "iot.eclipse.org";
 //const char* mqtt_server = "iot.eclipse.org";
 
 WiFiClient espClient;

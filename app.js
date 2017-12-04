@@ -25,7 +25,7 @@ app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
 // MQTT PubSub client
-const client  = mqtt.connect('mqtt://broker.mqtt-dashboard.com');
+const client  = mqtt.connect('mqtt://iot.eclipse.org');
 
 // App Secret can be retrieved from the App Dashboard
 const APP_SECRET = process.env.MESSENGER_APP_SECRET;
