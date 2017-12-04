@@ -72,11 +72,12 @@ void setup_wifi() {
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Topic is : [");
   Serial.print(topic);
-   Serial.print("] Payload: ");
-      String myString = (char*) payload;  // converting the payload to raw string
-      Serial.print(myString);
+  Serial.print("] Payload: ");
+  String myString = (char*) payload;  // converting the payload to raw string
+  Serial.print(myString);
+
   if (topic == "HiAlfredCommand/simple") {
-     
+
     char p = (char)payload[0];
 
     switch (p) {
@@ -117,7 +118,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
         break;
 
       case '4': {
-          int status = digitalRead(LED_PIN);
           switch_led();
         }
         break;
@@ -143,7 +143,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
         }
         break;
     }
-    Serial.println();
   }
 
   else if (topic == "HiAlfredCommand/set") {
@@ -152,6 +151,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     String(tmp + p);
     write_screen_message("Nouvelle temperature:", tmp);
   }
+  Serial.println();
 
 
 } //end callback
@@ -322,10 +322,10 @@ void switch_led_off() {
 
 void switch_led() {
   if (digitalRead(LED_PIN) == 0) {
-    switch_led_on();
+    switch_led_off();
   }
   else {
-    switch_led_off();
+    switch_led_on();
   }
 }
 

@@ -510,14 +510,26 @@ function sendLedMessage(status) {
 
 	console.log('sendLedMessage is triggered: ' + status);
 
-	const st = (status === '0' ? 'éteinte' : 'allumée');
-	const stBis = (status === '0' ? 'allumer' : 'éteindre');
+	const st = (status === '1' ? 'éteinte' : 'allumée');
+	const stBis = (status === '1' ? 'allumer' : 'éteindre');
 	const messageData = {
 		recipient: {
 			id: waitingUser
 		},
 		message: {
-			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?'
+			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?',
+			quick_replies: [
+				{
+					"content_type":"text",
+					"title":"Oui",
+					"payload":"LED_SET_YES"
+				},
+				{
+					"content_type":"text",
+					"title":"Non",
+					"payload":"LED_SET_NO"
+				}
+			]
 		}
 	};
 
