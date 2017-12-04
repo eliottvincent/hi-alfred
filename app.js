@@ -777,7 +777,7 @@ client.on('message', function (topic, message, packet) {
 		if (waitingUser !== "") {
 
 			console.log('sendLedMessage will be triggered: ' + message);
-			sendLedMessage(message);
+			sendLedMessage(message.toString());
 		}
 	}
 	// client.end()
