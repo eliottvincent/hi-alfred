@@ -268,11 +268,11 @@ function receivedMessage(event) {
 				break;
 
 			case 'on':
-				requestLightOn(recipientID);
+				requestLightOn(senderID);
 				break;
 
 			case 'off':
-				requestLightOff(recipientID);
+				requestLightOff(senderID);
 				break;
 
 			case 'image':
@@ -378,21 +378,20 @@ function receivedPostback(event) {
 	// button for Structured Messages.
 	const payload = event.postback.payload;
 
-	console.log("Received postback for user %d and page %d with payload '%s' " +
-		"at %d", senderID, recipientID, payload, timeOfPostback);
+	console.log("Received postback for user %d and page %d with payload '%s' at %d", senderID, recipientID, payload, timeOfPostback);
 
 	switch (payload) {
 
 		case 'LED':
-			requestLedStatus(recipientID);
+			requestLedStatus(senderID);
 			break;
 
 		case 'LED_SET_YES':
-			requestLedSet(recipientID);
+			requestLedSet(senderID);
 			break;
 
 		case 'LED_SET_NO':
-			sendLedSetNoMessage(recipientID);
+			sendLedSetNoMessage(senderID);
 			break;
 
 		default:
@@ -512,26 +511,24 @@ function sendLedMessage(status) {
 	waitingUser = "";
 }
 
-function requestLedStatus(recipientId) {
+function requestLedStatus(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '3');
 
-	waitingUser = recipientId;
+	waitingUser = senderID;
 
-	sendTypingOn(recipientId);
+	sendTypingOn(senderID);
 }
 
-function requestLedSet(recipientId) {
+function requestLedSet(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '4');
 
-	waitingUser = recipientId;
-
 	const messageData = {
 		recipient: {
-			id: recipientId
+			id: senderID
 		},
 		message: {
 			text: 'C\'est fait! 👍🏼'
@@ -540,24 +537,24 @@ function requestLedSet(recipientId) {
 	callSendAPI(messageData);
 }
 
-function requestTemperature(recipientId) {
+function requestTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '0');
 
-	waitingUser = recipientId;
+	waitingUser = senderID;
 
-	sendTypingOn(recipientId);
+	sendTypingOn(senderID);
 }
 
-function requestLightOn(recipientId) {
+function requestLightOn(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '+');
 
 	const messageData = {
 		recipient: {
-			id: recipientId
+			id: senderID
 		},
 		message: {
 			text: 'I switched the light on'
@@ -565,14 +562,14 @@ function requestLightOn(recipientId) {
 	};
 	callSendAPI(messageData);
 }
-function requestLightOff(recipientId) {
+function requestLightOff(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '-');
 
 	const messageData = {
 		recipient: {
-			id: recipientId
+			id: senderID
 		},
 		message: {
 			text: 'I switched the light off'
@@ -580,14 +577,14 @@ function requestLightOff(recipientId) {
 	};
 	callSendAPI(messageData);
 }
-function requestUpTemperature(recipientId) {
+function requestUpTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '2');
 
 	const messageData = {
 		recipient: {
-			id: recipientId
+			id: senderID
 		},
 		message: {
 			text: 'UP temperature'
@@ -596,14 +593,14 @@ function requestUpTemperature(recipientId) {
 	callSendAPI(messageData);
 }
 
-function requestDownTemperature(recipientId) {
+function requestDownTemperature(senderID) {
 
 	// command to ask temperature to MQTT Broker
 	client.publish('HiAlfredCommand', '-');
 
 	const messageData = {
 		recipient: {
-			id: recipientId
+			id: senderID
 		},
 		message: {
 			text: 'DOWN temperature'
