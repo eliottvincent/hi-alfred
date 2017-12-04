@@ -109,8 +109,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
         status = status + digitalRead(LED_PIN);
         Serial.println("LED status is ");
         Serial.println(status);
-        char message[1];
-        status.toCharArray(message, 1);
+        char message[4];
+        status.toCharArray(message, 4);
         client.publish("HiAlfredData/led", message);
       }
       break;

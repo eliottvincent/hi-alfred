@@ -1040,6 +1040,7 @@ client.on('message', function (topic, message, packet) {
 		console.log(message.toString());
 		if (waitingUser !== "") {
 
+			console.log('message: ' + message);
 			sendTemperatureMessage(message);
 		}
 	}
@@ -1050,6 +1051,7 @@ client.on('message', function (topic, message, packet) {
 
 		if (waitingUser !== "") {
 
+			console.log('message: ' + message);
 			sendLedMessage(message);
 		}
 	}
