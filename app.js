@@ -267,7 +267,7 @@ function receivedMessage(event) {
 			}
 			else {
 
-				requestTemperatureSet(messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase(), senderID);
+				requestTemperatureSet(messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase() + "      ", senderID);
 			}
 		}
 
@@ -546,14 +546,14 @@ function sendLedMessage(status) {
 
 	console.log('sendLedMessage is triggered: ' + status);
 
-	const st = (status === 0 ? 'éteinte' : 'allumée');
-	const stBis = (status === 0 ? 'allumer' : 'éteindre');
+	const statusFr = (status.toString() === '0' ? 'éteinte ' : 'allumée 💡');
+	const actionFr = (status.toString() === '0' ? 'allumer 💡' : 'éteindre');
 	const messageData = {
 		recipient: {
 			id: waitingUser
 		},
 		message: {
-			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?',
+			text: 'L\'ampoule est actuellement ' + statusFr + '. Souhaitez-vous l\'' + actionFr + ' ?',
 			quick_replies: [
 				{
 					"content_type":"text",
@@ -764,7 +764,6 @@ client.on('message', function (topic, message, packet) {
 
 	if (topic === 'HiAlfredData/tmp') {
 
-		console.log(message.toString());
 		if (waitingUser !== "") {
 
 			sendTemperatureMessage(message);
