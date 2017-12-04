@@ -424,32 +424,6 @@ function receivedAccountLink(event) {
 	console.log("Received account link event with for user %d with status %s and auth code %s ", senderID, status, authCode);
 }
 
-/*
- * If users came here through testdrive, they need to configure the server URL
- * in default.json before they can access local resources likes images/videos.
- */
-function requiresServerURL(next, [recipientId, ...args]) {
-	if (SERVER_URL === "to_be_set_manually") {
-		const messageData = {
-			recipient: {
-				id: recipientId
-			},
-			message: {
-				text: `
-We have static resources like images and videos available to test, but you need to update the code you downloaded earlier to tell us your current server url.
-1. Stop your node server by typing ctrl-c
-2. Paste the result you got from running "lt —port 5000" into your config/default.json file as the "serverURL".
-3. Re-run "node app.js"
-Once you've finished these steps, try typing “video” or “image”.
-        `
-			}
-		};
-
-		callSendAPI(messageData);
-	} else {
-		next.apply(this, [recipientId, ...args]);
-	}
-}
 
 function sendHiMessage(recipientId) {
 	const messageData = {
@@ -457,9 +431,7 @@ function sendHiMessage(recipientId) {
 			id: recipientId
 		},
 		message: {
-			text: `
-Hi! I'm Alfred 👨🏻
-      `
+			text: 'Salut! Je suis Alfred 👨🏻'
 		}
 	};
 
@@ -467,37 +439,14 @@ Hi! I'm Alfred 👨🏻
 }
 
 
-function sendLedMessage(status) {
 
-	console.log('sendLedMessage is triggered: ' + status);
+// ████████╗███████╗███╗   ███╗██████╗ ███████╗██████╗  █████╗ ████████╗██╗   ██╗██████╗ ███████╗
+// ╚══██╔══╝██╔════╝████╗ ████║██╔══██╗██╔════╝██╔══██╗██╔══██╗╚══██╔══╝██║   ██║██╔══██╗██╔════╝
+//	  ██║   █████╗  ██╔████╔██║██████╔╝█████╗  ██████╔╝███████║   ██║   ██║   ██║██████╔╝█████╗
+//    ██║   ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██╔══╝  ██╔══██╗██╔══██║   ██║   ██║   ██║██╔══██╗██╔══╝
+//    ██║   ███████╗██║ ╚═╝ ██║██║     ███████╗██║  ██║██║  ██║   ██║   ╚██████╔╝██║  ██║███████╗
+//    ╚═╝   ╚══════╝╚═╝     ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝
 
-	const st = (status === '0' ? 'éteinte' : 'allumée');
-	const stBis = (status === '0' ? 'allumer' : 'éteindre');
-	const messageData = {
-		recipient: {
-			id: waitingUser
-		},
-		message: {
-			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?',
-			quick_replies: [
-				{
-					"content_type":"text",
-					"title":"Oui",
-					"payload":"LED_SET_YES"
-				},
-				{
-					"content_type":"text",
-					"title":"Non",
-					"payload":"LED_SET_NO"
-				}
-			]
-		}
-	};
-
-	callSendAPI(messageData);
-
-	waitingUser = "";
-}
 
 function sendTemperatureSetMessage(recipientID) {
 
@@ -515,30 +464,6 @@ function sendTemperatureSetMessage(recipientID) {
 	callSendAPI(messageData);
 }
 
-function sendLedSetNoMessage(recipientID) {
-
-	const messageData = {
-		recipient: {
-			id: recipientID
-		},
-		message: {
-			text: 'Ok 🤷🏼‍♂️',
-
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-function requestLedStatus(senderID) {
-
-	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand/simple', '3');
-
-	waitingUser = senderID;
-
-	sendTypingOn(waitingUser);
-}
 
 function requestTemperatureSet(tmp, recipientID) {
 
@@ -556,32 +481,6 @@ function requestTemperatureSet(tmp, recipientID) {
 	};
 
 	callSendAPI(messageData);
-}
-
-function requestLedSet(senderID) {
-
-	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand/simple', '4');
-
-	const messageData = {
-		recipient: {
-			id: senderID
-		},
-		message: {
-			text: 'C\'est fait! 👍🏼'
-		}
-	};
-	callSendAPI(messageData);
-}
-
-function requestTemperature(senderID) {
-
-	// command to ask temperature to MQTT Broker
-	client.publish('HiAlfredCommand/simple', '0');
-
-	waitingUser = senderID;
-
-	sendTypingOn(senderID);
 }
 
 function requestUpTemperature(senderID) {
@@ -624,7 +523,7 @@ function sendTemperatureMessage(tmp) {
 			id: waitingUser
 		},
 		message: {
-			text: 'The temperature is actually ' + tmp + '°C'
+			text: 'La température de la pièce est de ' + tmp + '°C'
 		}
 	};
 	callSendAPI(messageData);
@@ -633,6 +532,110 @@ function sendTemperatureMessage(tmp) {
 }
 
 
+
+
+// ██╗     ███████╗██████╗
+// ██║     ██╔════╝██╔══██╗
+// ██║     █████╗  ██║  ██║
+// ██║     ██╔══╝  ██║  ██║
+// ███████╗███████╗██████╔╝
+// ╚══════╝╚══════╝╚═════╝
+
+
+function sendLedMessage(status) {
+
+	console.log('sendLedMessage is triggered: ' + status);
+
+	const st = (status === 0 ? 'éteinte' : 'allumée');
+	const stBis = (status === 0 ? 'allumer' : 'éteindre');
+	const messageData = {
+		recipient: {
+			id: waitingUser
+		},
+		message: {
+			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?',
+			quick_replies: [
+				{
+					"content_type":"text",
+					"title":"Oui",
+					"payload":"LED_SET_YES"
+				},
+				{
+					"content_type":"text",
+					"title":"Non",
+					"payload":"LED_SET_NO"
+				}
+			]
+		}
+	};
+
+	callSendAPI(messageData);
+
+	waitingUser = "";
+}
+
+
+function sendLedSetNoMessage(recipientID) {
+
+	const messageData = {
+		recipient: {
+			id: recipientID
+		},
+		message: {
+			text: 'Ok 🤷🏼‍♂️',
+
+		}
+	};
+
+	callSendAPI(messageData);
+}
+
+function requestLedStatus(senderID) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand/simple', '3');
+
+	waitingUser = senderID;
+
+	sendTypingOn(waitingUser);
+}
+
+
+function requestLedSet(senderID) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand/simple', '4');
+
+	const messageData = {
+		recipient: {
+			id: senderID
+		},
+		message: {
+			text: 'C\'est fait! 👍🏼'
+		}
+	};
+	callSendAPI(messageData);
+}
+
+function requestTemperature(senderID) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand/simple', '0');
+
+	waitingUser = senderID;
+
+	sendTypingOn(senderID);
+}
+
+
+
+
+//  █████╗ ██████╗ ██╗
+// ██╔══██╗██╔══██╗██║
+// ███████║██████╔╝██║
+// ██╔══██║██╔═══╝ ██║
+// ██║  ██║██║     ██║
+// ╚═╝  ╚═╝╚═╝     ╚═╝
 
 
 /*
@@ -764,20 +767,15 @@ client.on('message', function (topic, message, packet) {
 		console.log(message.toString());
 		if (waitingUser !== "") {
 
-			console.log('message: ' + message);
 			sendTemperatureMessage(message);
 		}
 	}
 
 	if (topic === 'HiAlfredData/led') {
 
-		console.log(message.toString());
-
-		console.log('waitingUser: ' + waitingUser);
 		if (waitingUser !== "") {
 
-			console.log('sendLedMessage will be triggered: ' + message);
-			sendLedMessage(message.toString());
+			sendLedMessage(message);
 		}
 	}
 	// client.end()
