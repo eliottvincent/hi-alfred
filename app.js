@@ -387,6 +387,14 @@ function receivedPostback(event) {
 			requestLedStatus(recipientID);
 			break;
 
+		case 'LED_SET_YES':
+			requestLedSet(recipientID);
+			break;
+
+		case 'LED_SET_NO':
+			sendLedSetNoMessage(recipientID);
+			break;
+
 		default:
 			sendTextMessage(senderID, "Postback called");
 			break;
@@ -475,12 +483,25 @@ Hi! I'm Alfred 👨🏻
 
 function sendLedMessage(status) {
 
+	const st = (status === 0 ? 'éteinte' : 'allumée');
+	const stBis = (status === 0 ? 'allumer' : 'éteindre');
 	const messageData = {
 		recipient: {
 			id: waitingUser
 		},
 		message: {
-			text: 'The light is currently ' + status
+			text: 'L\'ampoule est actuellement ' + st + '. Souhaitez-vous l\'' + stBis + ' ?',
+			quick_replies: [
+				{
+					"content_type":"text",
+					"title":"Oui",
+					"payload":"LED_SET_YES"
+				},				{
+					"content_type":"text",
+					"title":"Non",
+					"payload":"LED_SET_NO"
+				}
+			]
 		}
 	};
 
@@ -497,6 +518,24 @@ function requestLedStatus(recipientId) {
 	waitingUser = recipientId;
 
 	sendTypingOn(recipientId);
+}
+
+function requestLedSet(recipientId) {
+
+	// command to ask temperature to MQTT Broker
+	client.publish('HiAlfredCommand', '4');
+
+	waitingUser = recipientId;
+
+	const messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			text: 'C\'est fait! 👍🏼'
+		}
+	};
+	callSendAPI(messageData);
 }
 
 function requestTemperature(recipientId) {
@@ -1051,7 +1090,6 @@ client.on('message', function (topic, message, packet) {
 
 		if (waitingUser !== "") {
 
-			console.log('message: ' + message);
 			sendLedMessage(message);
 		}
 	}

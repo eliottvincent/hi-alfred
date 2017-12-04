@@ -115,6 +115,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
       }
       break;
 
+
+    case '4':
+      int status = digitalRead(LED_PIN);
+      switch_led();
+      break;
+
     case '+': {
         editedTmp += 1.0;
         String msg = "Tmp UP: ";
@@ -131,10 +137,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
       }
       break;
       
-    case '4':
-      stop_blink_led();
-      break;
-
 
     default: {
       }
@@ -307,7 +309,12 @@ void switch_led_off() {
 }
 
 void switch_led() {
-
+    if (digitalRead(LED_PIN) == 0) {
+      switch_led_on();
+    }
+    else {
+      switch_led_off();
+    }
 }
 
 void start_blink_led() {
