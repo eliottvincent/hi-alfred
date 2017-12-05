@@ -153,7 +153,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   else if (topicString == "HiAlfredCommand/set") {
 
     Serial.println("In topic HiAlfredCommand/set");
-    write_screen_message("Nouvelle temperature:", myString);
+    write_screen_message("Nouvelle", "temperature: " + myString);
   }
   Serial.println("bye");
   Serial.println();
