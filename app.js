@@ -260,10 +260,19 @@ function receivedMessage(event) {
 
 			userIsSettingTemperature = false;
 
-			if (nlp.hasOwnProperty('entities') && nlp.entities.hasOwnProperty('temperature')) {
+			if (nlp.hasOwnProperty('entities')) {
 
-				const tmp = nlp.entities.temperature[0].value.toString() + "      ";
-				requestTemperatureSet(tmp, senderID);
+				if (nlp.entities.hasOwnProperty('temperature')) {
+
+					const tmp = nlp.entities.temperature[0].value.toString() + "      ";
+					requestTemperatureSet(tmp, senderID);
+				}
+
+				else if (nlp.entities.hasOwnProperty('quantity')) {
+
+					const tmp = nlp.entities.quantity[0].value.toString() + "      ";
+					requestTemperatureSet(tmp, senderID);
+				}
 			}
 			else {
 
