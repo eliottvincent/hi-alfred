@@ -273,6 +273,11 @@ function receivedMessage(event) {
 					const tmp = nlp.entities.quantity[0].value.toString() + "      ";
 					requestTemperatureSet(tmp, senderID);
 				}
+
+				else {
+
+					requestTemperatureSet(messageText.replace(/[^\w\s]/gi, '').trim().toLowerCase() + "      ", senderID);
+				}
 			}
 			else {
 
