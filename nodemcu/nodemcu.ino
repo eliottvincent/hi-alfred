@@ -2,7 +2,7 @@
 #include <PubSubClient.h>
 #include <LiquidCrystal_I2C.h>
 
-// Define NodeMCU A0 pin to as temperature data pin of tmp sensor
+// data pins definition
 #define TMP_PIN A0
 #define LED_PIN D8
 
@@ -10,18 +10,11 @@
 const char* ssid = "Eliott's iPhone";
 const char* password = "ntmmmmmm";
 const char* mqtt_server = "iot.eclipse.org";
-//const char* mqtt_server = "iot.eclipse.org";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-// Construct an LCD object and pass it the
-// I2C address, width (in characters) and
-// height (in characters). Depending on the
-// Actual device, the IC2 address may change.
 LiquidCrystal_I2C lcd(0x20, 16, 2);
 
-float editedTmp = 0.0;
 char msg[50];
 
 
@@ -34,10 +27,11 @@ char msg[50];
 // ╚███╔███╔╝██║██║     ██║
 //  ╚══╝╚══╝ ╚═╝╚═╝     ╚═╝
 
-/**
-   Sets up the WiFi connection.
 
-*/
+/**
+ * Sets up the WiFi connection.
+ * 
+ */
 void setup_wifi() {
   delay(100);
   // We start by connecting to a WiFi network
@@ -51,7 +45,7 @@ void setup_wifi() {
   randomSeed(micros());
   Serial.println("");
   Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
@@ -65,23 +59,31 @@ void setup_wifi() {
 // ██║ ╚═╝ ██║╚██████╔╝   ██║      ██║
 // ╚═╝     ╚═╝ ╚══▀▀═╝    ╚═╝      ╚═╝
 
-/**
-   Callback method called on any subscribed topic's update.
 
-*/
+/**
+ * Sets the MQTT broker connection up.
+ * 
+ */
+void setup_mqtt() {
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback); // callback function called when new data on any subscribed topic
+}
+
+
+/**
+ * Callback method called on any subscribed topic's update.
+ * 
+ */
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Topic is : [");
   Serial.print(topic);
   Serial.print("] Payload: ");
   String myString = (char*) payload;  // converting the payload to raw string
-  Serial.print(myString);
-  Serial.println();
-  Serial.println("hello");
+  Serial.println(myString);
   String topicString = topic;
   
   if (topicString == "HiAlfredCommand/simple") {
 
-    Serial.println("In topic HiAlfredCommand/simple");
     char p = (char)payload[0];
 
     Serial.println(p);
@@ -98,19 +100,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
           client.publish("HiAlfredData/tmp", message);
         }
         break;
-
-      case '1': {
-          switch_led_on();
-          Serial.println(" is to switch LED ON!] ");
-        }
-        break;
-
-      case '2': {
-          switch_led_off();
-          Serial.println(" is to switch LED OFF!] ");
-        }
-        break;
-
+        
       case '3': {
           String status = "";
           status = status + digitalRead(LED_PIN);
@@ -127,23 +117,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
         }
         break;
 
-      case '+': {
-          editedTmp += 1.0;
-          String msg = "Tmp UP: ";
-          msg = msg + editedTmp;
-          write_screen_message(msg, "");
-        }
-        break;
-
-      case '-': {
-          editedTmp -= 1.0;
-          String msg = "Tmp UP: ";
-          msg = msg + editedTmp;
-          write_screen_message(msg, "");
-        }
-        break;
-
-
       default: {
         }
         break;
@@ -152,22 +125,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   else if (topicString == "HiAlfredCommand/set") {
 
-    Serial.println("In topic HiAlfredCommand/set");
     write_screen_message("Nouvelle", "temperature: " + myString);
   }
-  Serial.println("bye");
-  Serial.println();
-
-
-} //end callback
+}
 
 
 /**
-   Method aiming at reconnecting to MQTT broker if connection lost or interrupted.
-
-*/
-void reconnect() {
-  // Loop until we're reconnected
+ * Method aiming at connecting to MQTT broker and subscribing to topics.
+ * 
+ */
+void mqtt_connect() {
+  // Loop until we're connected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Create a random client ID
@@ -202,38 +170,38 @@ void reconnect() {
 // ██║ ╚████║╚██████╔╝██████╔╝███████╗██║ ╚═╝ ██║╚██████╗╚██████╔╝
 // ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═════╝
 
-/**
 
-*/
+/**
+ * Sets up the NodeMCU.
+ * 
+ */
 void setup() {
 
   Serial.begin(115200);
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback); // callback function called when new data on any subscribed topic
-  Serial.print(" Starting Temparature ");
-  float celsius = getTemperature();
-  editedTmp = celsius;
-  Serial.print(celsius);
-  Serial.println('C');
+  setup_mqtt();
 
   setup_screen();
   setup_led();
 }
 
-/**
 
-*/
+/**
+ * Looping method.
+ * 
+ */
 void loop() {
   if (!client.connected()) {
-    reconnect();
+    mqtt_connect();
   }
   client.loop();
 }
 
-/**
 
-*/
+/**
+ * Real-time temperature getter.
+ * 
+ */
 float getTemperature() {
   int analogValue = analogRead(TMP_PIN);
   float millivolts = (analogValue / 1024.0) * 3300; //3300 is the voltage provided by NodeMCU
@@ -251,10 +219,11 @@ float getTemperature() {
 // ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
 // ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
 
-/**
-   Sets up the I2C screen.
 
-*/
+/**
+ * Sets up the I2C screen.
+ * 
+ */
 void setup_screen() {
 
   // The begin call takes the width and height. This
@@ -265,13 +234,18 @@ void setup_screen() {
   // Turn on the backlight.
   lcd.backlight();
 
-  write_screen_message("premiere ligne", "deuxieme ligne");
+  String tmp = String(getTemperature()) + 'C';
+  write_screen_message("Temperature:", tmp);
+  
+  Serial.print("Temperature: ");
+  Serial.println(tmp);
 }
 
-/**
-   Writes a message on the screen.
 
-*/
+/**
+ * Writes a message on the screen.
+ * 
+ */
 void write_screen_message(String firstLine, String secondLine) {
 
   clear_screen();
@@ -279,19 +253,21 @@ void write_screen_message(String firstLine, String secondLine) {
   write_screen(0, 1, secondLine);
 }
 
-/**
-   Writes a String at x and y position.
 
-*/
+/**
+ * Writes a String at x and y position.
+ * 
+ */
 void write_screen(int x, int y, String msg) {
   lcd.setCursor(x, y);
   lcd.print(msg);
 }
 
-/**
-   Clears the screen.
 
-*/
+/**
+ * Clears the screen.
+ * 
+ */
 void clear_screen() {
   String empty = "                ";
   write_screen(0, 0, empty);
@@ -308,6 +284,11 @@ void clear_screen() {
 // ███████╗███████╗██████╔╝
 // ╚══════╝╚══════╝╚═════╝
 
+
+/** 
+ *  Sets up the LED.
+ *  
+ */
 void setup_led() {
 
   pinMode(LED_PIN, OUTPUT);
@@ -324,14 +305,11 @@ void setup_led() {
   */
 }
 
-void switch_led_on() {
-  digitalWrite(LED_PIN, HIGH);
-}
 
-void switch_led_off() {
-  digitalWrite(LED_PIN, LOW);
-}
-
+/**
+ * Switches the LED ON or OFF depending on its status.
+ * 
+ */
 void switch_led() {
   if (digitalRead(LED_PIN) == 0) {
     switch_led_on();
@@ -341,6 +319,19 @@ void switch_led() {
   }
 }
 
+void switch_led_on() {
+  digitalWrite(LED_PIN, HIGH);
+}
+
+void switch_led_off() {
+  digitalWrite(LED_PIN, LOW);
+}
+
+
+/**
+ * Makes the LED blink for a few seconds.
+ * 
+ */
 void start_blink_led() {
 
   digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
@@ -363,10 +354,3 @@ void start_blink_led() {
   delay(100);
   digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
 }
-
-
-void stop_blink_led() {
-
-  // led_blinking = false;
-}
-
